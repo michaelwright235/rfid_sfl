@@ -2,7 +2,7 @@
 name = "rfid_sfl"
 description = "RFID Server For Libraries"
 authors = ["Michael Wright <maiklpolkovnikov@gmail.com>"]
-repository = "https://github.com/michaelwright235/rfid_sdl/"
+repository = "https://github.com/michaelwright235/rfid_sfl/"
 categories = ["network-programming"]
 keywords = ["web", "http", "usb"]
 license = "GPL-3.0-or-later"
