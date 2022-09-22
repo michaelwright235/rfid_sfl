@@ -8,8 +8,8 @@ use std::path::Path;
 #[serde(crate = "rocket::serde")]
 pub struct Config {
     address: String,
-    log_level: String,
     port: u16,
+    log_level: String,
     log_to_file: bool,
     max_log_size: u16,
     ask_when_writing: bool
@@ -21,7 +21,7 @@ impl Default for Config {
             address: "127.0.0.1".to_string(),
             port: 21646,
             log_to_file: true,
-            log_level: "Debug".to_string(),
+            log_level: "Info".to_string(),
             max_log_size: 5,
             ask_when_writing: false,
         }
