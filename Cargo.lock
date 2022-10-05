@@ -1111,7 +1111,7 @@ dependencies = [
 
 [[package]]
 name = "rfid_sfl"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "cf_rh320u_93_reader",
  "log",

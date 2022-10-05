@@ -6,7 +6,7 @@ repository = "https://github.com/michaelwright235/rfid_sfl/"
 categories = ["network-programming"]
 keywords = ["web", "http", "usb"]
 license = "GPL-3.0-or-later"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2021"
 
 [dependencies]
