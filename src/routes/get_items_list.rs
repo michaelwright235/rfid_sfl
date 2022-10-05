@@ -57,7 +57,7 @@ pub fn handler(
     for item in items {
         if item.is_empty() {
             item_responses.push(ItemResponse {
-                id: None,
+                id: Some(item.card_id_string()),
                 r#type: 0,
                 tags: vec![Tag {
                     tagId: "{}".to_string(),

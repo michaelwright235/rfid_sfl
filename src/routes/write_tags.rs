@@ -71,11 +71,13 @@ pub async fn handler(
        params.itemId.len() != params.itemSize.len() ||
        params.itemId.len() != params.indexInItemPack.len()
     {
+        debug!("Params are not valid!");
         return RfidStatusResponse::Err400( RfidResponse::default() );
     }
 
     for lib in &params.libraryId {
         if lib.len() < 3 {
+            debug!("Library id is not valid!");
             return RfidStatusResponse::Err400( RfidResponse::default() );
         }
     }
@@ -86,12 +88,13 @@ pub async fn handler(
         let mut item = DanishRfidItem::default();
         item.set_number_of_parts(params.itemSize[i]);
         item.set_ordinal_number(params.indexInItemPack[i]);
-        if item.set_card_id_string(&params.id[i]).is_err() ||
+        if 
            item.set_item_id(&params.itemId[i]).is_err() ||
            item.set_usage_type(params.r#type[i]).is_err() ||
            item.set_country(&params.libraryId[i][0..2]).is_err() ||
            item.set_library_id(&params.libraryId[i][3..]).is_err()
         {
+            debug!("Params of an item are not valid!");
             return RfidStatusResponse::Err400( RfidResponse::default() );
         }
         debug!("item = {:?}", item);
@@ -114,7 +117,7 @@ pub async fn handler(
 
     if confirm {
         let responses = device.write_tags(items);
-        debug!("{:?}",responses);
+        debug!("Write tag responses: {:?}",responses);
         info!("Card(s) has been successfully written");
         return RfidStatusResponse::Ok(
             RfidResponse::from_string(json::to_string(&responses).unwrap())

@@ -92,6 +92,13 @@ impl Device for CfRh320u93 {
                 }];
             }
         }
-        vec![]
+        vec![WriteResponse {
+            id: items[0].card_id_string(),
+            success: false,
+            error: Some(WriteError{
+                r#type: "Write Error".to_string(),
+                message: "Couldn't connect to the reader".to_string()
+            })
+        }]
     }
 }
