@@ -143,7 +143,6 @@ impl DanishRfidItem {
             }
             crc_sum &= 0xffff;
         }
-        println!();
         crc_sum
     }
 
