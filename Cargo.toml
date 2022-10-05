@@ -16,3 +16,6 @@ rocket-client-addr = "0.5.2"
 log = "0.4.17"
 simplelog = "0.12.0"
 native-dialog = {git = "https://github.com/michaelwright235/native-dialog-rs", branch = "user_notification"}
+
+[profile.release]
+strip = true
