@@ -44,8 +44,15 @@ pub fn handler(
         return RfidStatusResponse::Err404( RfidResponse::default() );
     }
 
-    let device = get_device.unwrap();
-    let items = device.as_ref().get_items();
+    let device_mutex = get_device.unwrap();
+    let mut device = device_mutex.lock().unwrap();
+    device.connect();
+
+    if !device.is_connected() {
+        return RfidStatusResponse::Err404(RfidResponse::from_str(""));
+    }
+
+    let items = device.get_items();
     if items.len() == 0 {
         info!("No cards found");
         return RfidStatusResponse::Ok(
@@ -57,7 +64,7 @@ pub fn handler(
     for item in items {
         if item.is_empty() {
             item_responses.push(ItemResponse {
-                id: Some(item.card_id_string()),
+                id: None,
                 r#type: 0,
                 tags: vec![Tag {
                     tagId: "{}".to_string(),

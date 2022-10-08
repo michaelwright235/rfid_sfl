@@ -41,7 +41,7 @@ pub struct WriteError {
 
 // POST http://127.0.0.1:21646/rfid/
 #[post("/", data="<params>")]
-pub async fn handler(
+pub fn handler(
     shared_resource: &State<DevicesList>, 
     config: &State<Config>,
     client_addr: &ClientAddr, 
@@ -60,7 +60,9 @@ pub async fn handler(
         return RfidStatusResponse::Err404( RfidResponse::default() );
     }
 
-    let device = get_device.unwrap();
+    let device_mutex = get_device.unwrap();
+    let mut device = device_mutex.lock().unwrap();
+    device.connect();
 
     debug!("Write tag: {:?}", params);
 
@@ -105,13 +107,12 @@ pub async fn handler(
 
     // Shows confirm dialog to a user
     if config.ask_when_writing() {
-        let confirm_thread = rocket::tokio::task::spawn(async {
+        confirm = rocket::tokio::task::block_in_place(|| {
             native_dialog::MessageDialog::new()
             .set_title("RFID Server For Libraries")
             .set_text("Записать карту на считывателе?")
-            .set_type(native_dialog::MessageType::Info).show_confirm().unwrap_or(false)
+            .set_type(native_dialog::MessageType::Info).show_confirm().unwrap_or(true)
         });
-        confirm = confirm_thread.await.unwrap_or(false);
         info!("User confirmation for writing a card: {confirm}");
     }
 
@@ -136,5 +137,4 @@ pub fn handler_options(client_addr: &ClientAddr) -> RfidStatusResponse {
         return r;
     }
     RfidStatusResponse::Ok( RfidResponse::default() )
-    //handler(shared_resource, config, client_addr, params).await
 }

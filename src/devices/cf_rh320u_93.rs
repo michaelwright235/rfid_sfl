@@ -4,20 +4,30 @@ use crate::devices::WriteResponse;
 use crate::routes::write_tags::WriteError;
 use super::Device;
 
-#[derive(Debug)]
-pub struct CfRh320u93;
+pub struct CfRh320u93 {
+    handle: Result<CFRH320U93, ReaderError>
+}
+
+impl CfRh320u93 {
+    pub fn new() -> Self {
+        Self {handle: CFRH320U93::open()}
+    }
+}
 
 impl Device for CfRh320u93 {
-    fn get_name(&self) -> &str {
-        "Chafon CF-RH320U-93"
-    }
-
-    fn is_busy(&self) -> bool {
-        todo!()
+    fn connect(&mut self) {
+        // Reopen device if there was an error
+        if let Ok(device) = &self.handle {
+            if device.manufacturer().is_err() {
+                self.handle = CFRH320U93::open();
+            }
+        } else {
+            self.handle = CFRH320U93::open();
+        }
     }
 
     fn is_connected(&self) -> bool {
-        match CFRH320U93::open() {
+        match self.handle {
             Ok(_) => true,
             Err(_) => false,
         }
@@ -36,8 +46,8 @@ impl Device for CfRh320u93 {
     }
 
     fn get_items(&self) -> Vec<DanishRfidItem> {
-        if let Ok(device) = CFRH320U93::open() {
-            let _ = device.control_led(0x01, 0x10);
+        if let Ok(device) = &self.handle {
+            let _ = device.control_led(0x01, 0x20);
 
             if let Ok(inventory) = device.iso15693_inventory() {
                 // this reader supports reading only 1 card at a time
@@ -57,7 +67,7 @@ impl Device for CfRh320u93 {
     }
 
     fn write_tags(&self, items: Vec<DanishRfidItem>) -> Vec<WriteResponse> {
-        if let Ok(device) = CFRH320U93::open() {
+        if let Ok(device) = &self.handle {
             let _ = device.control_led(0x01, 0x10);
 
             if items.len() != 1 {

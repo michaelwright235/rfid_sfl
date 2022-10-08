@@ -29,12 +29,14 @@ pub fn handler(shared_resource: &State<DevicesList>, client_addr: &ClientAddr) -
 
     let devices = shared_resource.inner().get();
     let mut devices_json = Vec::with_capacity(devices.len());
-    for (name, device) in devices {
+    for (name, device_mutex) in devices {
+        let mut device = device_mutex.lock().unwrap();
+        device.connect();
         if device.is_connected() {
             info!("Available device: {name}");
             devices_json.push(DeviceJson {
                 id: name.to_string(),
-                title: device.get_name().to_string(),
+                title: name.to_owned(),
                 isOnline: device.is_connected(),
                 manualConnectIsNeeded: false,
                 multiTagIsSupported: device.multi_tag_is_supported(),

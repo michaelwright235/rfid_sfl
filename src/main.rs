@@ -94,9 +94,9 @@ fn launch() -> _ {
     let rocket_config: rocket::Config = rocket::Config {
         address: address.unwrap(),
         port: config.port(),
-        log_level: rocket::config::LogLevel::Off, // Используем свой логгер
+        log_level: rocket::config::LogLevel::Off, // using our own logger
         cli_colors: !config.log_to_file(),
-        workers: 1,
+        workers: 1, // just for safety
         ..Default::default()
     };
 

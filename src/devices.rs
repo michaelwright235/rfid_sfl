@@ -1,13 +1,15 @@
-pub mod test_device;
+mod test_device;
 mod cf_rh320u_93;
 
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Mutex};
 use crate::{rfid_items::DanishRfidItem, routes::write_tags::WriteResponse};
-use self::{test_device::TestDevice, cf_rh320u_93::CfRh320u93};
+use self::cf_rh320u_93::CfRh320u93;
+#[cfg(test)] use self::test_device::TestDevice;
+
+type DeviceMutexBoxT = Mutex< Box<dyn Device> >;
 
 pub trait Device: Send + Sync {
-    fn get_name(&self) -> &str;
-    fn is_busy(&self) -> bool;
+    fn connect(&mut self);
     fn is_connected(&self) -> bool;
     fn multi_tag_is_supported(&self) -> bool;
     fn compound_data_is_supported(&self) -> bool;
@@ -18,27 +20,20 @@ pub trait Device: Send + Sync {
 }
 
 pub struct DevicesList {
-    devices: HashMap<String, Box<dyn Device>>
+    devices: HashMap<String, DeviceMutexBoxT >
 }
 
 impl DevicesList {
     pub fn new() -> Self {
-        let mut available_devices: Vec<Box<dyn Device>> = Vec::new();
-        if cfg!(test) {
-            available_devices.push(Box::new(TestDevice{}));
-        }
-        available_devices.push(Box::new(CfRh320u93{}));
+        let mut devices: HashMap<String, DeviceMutexBoxT > = HashMap::new();
 
-        let mut devices: HashMap<String, Box<dyn Device>> = HashMap::new();
+        #[cfg(test)] devices.insert("Test Device".to_string(), Mutex::new(Box::new(TestDevice{})));
+        devices.insert("Chafon CF-RH320U-93".to_string(), Mutex::new(Box::new( CfRh320u93::new())));
 
-        for kind in available_devices {
-            let name = kind.as_ref().get_name();
-            devices.insert(name.to_string(),kind);
-        }      
         Self { devices: devices }
     }
 
-    pub fn get(&self) -> &HashMap<String, Box<dyn Device>> {
+    pub fn get(&self) -> &HashMap<String, DeviceMutexBoxT > {
         &self.devices
     }
 }
