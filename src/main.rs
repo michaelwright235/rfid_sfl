@@ -76,15 +76,15 @@ fn prepare_server() -> Option<Config> {
 
 #[launch]
 fn launch() -> _ {
-    let config;
-    match prepare_server() {
-        Some(c) => config = c,
+    let config = match prepare_server() {
+        Some(c) => c,
         None => {
             error!("Error opening config.json file! You can delete it, so the new default one will be created.");
             warn!("Using default configuration");
-            config = Config::default();
+            Config::default()
         }
-    }
+    };
+
     let address = IpAddr::from_str(config.address());
     if address.is_err() {
         error!("Unable to parse the IP address");

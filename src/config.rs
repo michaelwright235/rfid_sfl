@@ -102,29 +102,29 @@ impl Config {
     pub fn default_string() -> Result<String, ()> {
         let config = json::to_pretty_string(&Config{..Default::default()});
         match config {
-            Err(_) => return Err(()),
+            Err(_) => Err(()),
             Ok(r) => Ok(r)
         }
     }
 
     #[allow(unused)]
     pub fn address(&self) -> &String {
-        return &self.address;
+        &self.address
     }
 
     #[allow(unused)]
     pub fn port(&self) -> u16 {
-        return self.port;
+        self.port
     }
 
     #[allow(unused)]
     pub fn log_to_file(&self) -> bool {
-        return self.log_to_file;
+        self.log_to_file
     }
 
     #[allow(unused)]
     pub fn max_log_size(&self) -> u16 {
-        return self.max_log_size;
+        self.max_log_size
     }
 
     #[allow(unused)]
@@ -135,7 +135,7 @@ impl Config {
             "Warn" => LevelFilter::Warn,
             "Debug" => LevelFilter::Debug,
             "Trace" => LevelFilter::Trace,
-            "Info" | _ => LevelFilter::Info,
+            _ => LevelFilter::Info,
         }
     }
 

@@ -34,7 +34,7 @@ pub fn handler(
     client_addr: &ClientAddr, deviceId: &str
 ) -> RfidStatusResponse {
     // Check if remote address is local. If not then exit
-    if let Err(r) = check_if_addr_local(&client_addr) {
+    if let Err(r) = check_if_addr_local(client_addr) {
         return r;
     }
 
@@ -53,7 +53,7 @@ pub fn handler(
     }
 
     let items = device.get_items();
-    if items.len() == 0 {
+    if items.is_empty() {
         info!("No cards found");
         return RfidStatusResponse::Ok(
             RfidResponse::from_str("[]")

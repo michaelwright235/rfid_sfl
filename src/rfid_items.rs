@@ -56,20 +56,20 @@ impl DanishRfidItem {
         let standart_version = bytes[0] & 0x0F;
         let number_of_parts = bytes[1];
         let ordinal_number = bytes[2];
-        let item_id;
+        
 
-        match String::from_utf8(Self::strip0s(&bytes[3..19]).to_vec()) {
-            Ok(s) => item_id = s,
+        let item_id = match String::from_utf8(Self::strip0s(&bytes[3..19]).to_vec()) {
+            Ok(s) => s,
             Err(_) => return Err(())
         };
-        let country;
-        match String::from_utf8(Self::strip0s(&bytes[21..23]).to_vec()) {
-            Ok(s) => country = s,
+        
+        let country = match String::from_utf8(Self::strip0s(&bytes[21..23]).to_vec()) {
+            Ok(s) => s,
             Err(_) => return Err(())
         };
-        let library_id;
-        match String::from_utf8(Self::strip0s(&bytes[23..]).to_vec()) {
-            Ok(s) => library_id = s,
+        
+        let library_id = match String::from_utf8(Self::strip0s(&bytes[23..]).to_vec()) {
+            Ok(s) => s,
             Err(_) => return Err(())
         };
         
@@ -151,7 +151,7 @@ impl DanishRfidItem {
             return Err(());
         }
         self.usage_type = usage_type;
-        return Ok(());
+        Ok(())
     }
     pub fn usage_type(&self) -> u8 {
         self.usage_type
@@ -162,7 +162,7 @@ impl DanishRfidItem {
             return Err(());
         }
         self.standart_version = standart_version;
-        return Ok(());
+        Ok(())
     }
     pub fn standart_version(&self) -> u8 {
         self.standart_version
@@ -187,7 +187,7 @@ impl DanishRfidItem {
             return Err(());
         }
         self.item_id = item_id.to_string();
-        return Ok(());
+        Ok(())
     }
     pub fn item_id(&self) -> &String {
         &self.item_id
@@ -198,7 +198,7 @@ impl DanishRfidItem {
             return Err(());
         }
         self.country = country.to_string();
-        return Ok(());
+        Ok(())
     }
     pub fn country(&self) -> &String {
         &self.country
@@ -209,7 +209,7 @@ impl DanishRfidItem {
             return Err(());
         }
         self.library_id = library_id.to_string();
-        return Ok(());
+        Ok(())
     }
     pub fn library_id(&self) -> &String {
         &self.library_id
@@ -258,7 +258,7 @@ impl DanishRfidItem {
     }
 
     pub fn is_empty(&self) -> bool {
-        return self.empty;
+        self.empty
     }
 
 }

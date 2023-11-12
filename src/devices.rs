@@ -30,7 +30,7 @@ impl DevicesList {
         #[cfg(test)] devices.insert("Test Device".to_string(), Mutex::new(Box::new(TestDevice{})));
         devices.insert("Chafon CF-RH320U-93".to_string(), Mutex::new(Box::new( CfRh320u93::new())));
 
-        Self { devices: devices }
+        Self { devices }
     }
 
     pub fn get(&self) -> &HashMap<String, DeviceMutexBoxT > {

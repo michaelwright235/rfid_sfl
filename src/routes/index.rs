@@ -5,7 +5,7 @@ use super::{check_if_addr_local, RfidResponse, RfidStatusResponse};
 #[get("/")]
 pub fn handler(client_addr: &ClientAddr) -> RfidStatusResponse {
     // Check if remote address is local. If not then exit
-    if let Err(r) = check_if_addr_local(&client_addr) {
+    if let Err(r) = check_if_addr_local(client_addr) {
         return r;
     }
 

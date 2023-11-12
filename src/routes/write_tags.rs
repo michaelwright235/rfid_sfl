@@ -47,7 +47,7 @@ pub fn handler(
     client_addr: &ClientAddr, 
     params: Form<WriteRequest<'_>>) -> RfidStatusResponse {
     // Check if remote address is local. If it's not then exit
-    if let Err(r) = check_if_addr_local(&client_addr) {
+    if let Err(r) = check_if_addr_local(client_addr) {
         return r;
     }
 
@@ -91,7 +91,7 @@ pub fn handler(
         item.set_number_of_parts(params.itemSize[i]);
         item.set_ordinal_number(params.indexInItemPack[i]);
         if 
-           item.set_item_id(&params.itemId[i]).is_err() ||
+           item.set_item_id(params.itemId[i]).is_err() ||
            item.set_usage_type(params.r#type[i]).is_err() ||
            item.set_country(&params.libraryId[i][0..2]).is_err() ||
            item.set_library_id(&params.libraryId[i][3..]).is_err()
@@ -120,11 +120,11 @@ pub fn handler(
         let responses = device.write_tags(items);
         debug!("Write tag responses: {:?}",responses);
         info!("Card(s) has been successfully written");
-        return RfidStatusResponse::Ok(
+        RfidStatusResponse::Ok(
             RfidResponse::from_string(json::to_string(&responses).unwrap())
         )
     } else {
-        return RfidStatusResponse::Err404( RfidResponse::default() );
+        RfidStatusResponse::Err404( RfidResponse::default() )
     }
 
 }
@@ -133,7 +133,7 @@ pub fn handler(
 #[options("/")]
 pub fn handler_options(client_addr: &ClientAddr) -> RfidStatusResponse {
     // Check if remote address is local. If it's not then exit
-    if let Err(r) = check_if_addr_local(&client_addr) {
+    if let Err(r) = check_if_addr_local(client_addr) {
         return r;
     }
     RfidStatusResponse::Ok( RfidResponse::default() )

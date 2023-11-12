@@ -27,10 +27,7 @@ impl Device for CfRh320u93 {
     }
 
     fn is_connected(&self) -> bool {
-        match self.handle {
-            Ok(_) => true,
-            Err(_) => false,
-        }
+        self.handle.is_ok()
     }
 
     fn multi_tag_is_supported(&self) -> bool {
@@ -53,17 +50,14 @@ impl Device for CfRh320u93 {
                 // this reader supports reading only 1 card at a time
                 if inventory.len() == 1 {
                     let bytes = device.iso15693_read(AccessFlag::WithoutUID, 0, 0x08).unwrap_or(vec![]);
-                    match DanishRfidItem::from_bytes(&bytes) {
-                        Ok(mut item) => {
-                            item.set_card_id(inventory[0].to_vec());
-                            return vec![item];
-                        },
-                        Err(_) => ()
+                    if let Ok(mut item) = DanishRfidItem::from_bytes(&bytes) {
+                        item.set_card_id(inventory[0].to_vec());
+                        return vec![item];
                     }
                 }
             }
         }
-        return vec![];
+        vec![]
     }
 
     fn write_tags(&self, items: Vec<DanishRfidItem>) -> Vec<WriteResponse> {
