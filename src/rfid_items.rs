@@ -4,13 +4,13 @@ use log::*;
 pub struct DanishRfidItem {
     empty: bool,
     card_id: Vec<u8>,
-    usage_type: u8, // u4 in fact
+    usage_type: u8,       // u4 in fact
     standart_version: u8, // u4 in fact
     number_of_parts: u8,
     ordinal_number: u8,
-    item_id: String, // max 16 chars long
-    country: String, // max 2 chars long
-    library_id: String // max 11 chars long
+    item_id: String,    // max 16 chars long
+    country: String,    // max 2 chars long
+    library_id: String, // max 11 chars long
 }
 
 impl Default for DanishRfidItem {
@@ -24,7 +24,7 @@ impl Default for DanishRfidItem {
             ordinal_number: 1,
             item_id: Default::default(),
             country: Default::default(),
-            library_id: Default::default()
+            library_id: Default::default(),
         }
     }
 }
@@ -56,23 +56,22 @@ impl DanishRfidItem {
         let standart_version = bytes[0] & 0x0F;
         let number_of_parts = bytes[1];
         let ordinal_number = bytes[2];
-        
 
         let item_id = match String::from_utf8(Self::strip0s(&bytes[3..19]).to_vec()) {
             Ok(s) => s,
-            Err(_) => return Err(())
+            Err(_) => return Err(()),
         };
-        
+
         let country = match String::from_utf8(Self::strip0s(&bytes[21..23]).to_vec()) {
             Ok(s) => s,
-            Err(_) => return Err(())
+            Err(_) => return Err(()),
         };
-        
+
         let library_id = match String::from_utf8(Self::strip0s(&bytes[23..]).to_vec()) {
             Ok(s) => s,
-            Err(_) => return Err(())
+            Err(_) => return Err(()),
         };
-        
+
         Ok(Self {
             empty: false,
             card_id: vec![],
@@ -82,7 +81,7 @@ impl DanishRfidItem {
             ordinal_number,
             item_id,
             country,
-            library_id
+            library_id,
         })
     }
 
@@ -116,9 +115,9 @@ impl DanishRfidItem {
 
     fn strip0s(bytes: &[u8]) -> &[u8] {
         let mut new_len = bytes.len();
-        for i in 0..(bytes.len()-1) {
-            if bytes[bytes.len()-1-i] == 0x00 {
-                new_len = bytes.len()-1-i;
+        for i in 0..(bytes.len() - 1) {
+            if bytes[bytes.len() - 1 - i] == 0x00 {
+                new_len = bytes.len() - 1 - i;
             } else {
                 break;
             }
@@ -132,9 +131,9 @@ impl DanishRfidItem {
 
         for b in bytes {
             let mut c = *b as u16;
-            c<<=8;
+            c <<= 8;
             for _ in 0..8 {
-                let xor_flag=((crc_sum ^ c) & 0x8000)!=0;
+                let xor_flag = ((crc_sum ^ c) & 0x8000) != 0;
                 crc_sum <<= 1;
                 if xor_flag {
                     crc_sum ^= crc_poly;
@@ -218,12 +217,12 @@ impl DanishRfidItem {
     pub fn set_card_id(&mut self, card_id: Vec<u8>) {
         self.card_id = card_id;
     }
-    pub fn set_card_id_string(&mut self, card_id: &str) -> Result<(), ()>{
+    pub fn set_card_id_string(&mut self, card_id: &str) -> Result<(), ()> {
         fn sub_strings(string: &str, sub_len: usize) -> Vec<&str> {
             let mut subs = Vec::with_capacity(string.len() / sub_len);
             let mut iter = string.chars();
             let mut pos = 0;
-        
+
             while pos < string.len() {
                 let mut len = 0;
                 for ch in iter.by_ref().take(sub_len) {
@@ -252,7 +251,7 @@ impl DanishRfidItem {
     pub fn card_id_string(&self) -> String {
         let mut s = String::new();
         for b in &self.card_id {
-            s.push_str( format!("{:02X}", b).as_str() );
+            s.push_str(format!("{:02X}", b).as_str());
         }
         s
     }
@@ -260,12 +259,14 @@ impl DanishRfidItem {
     pub fn is_empty(&self) -> bool {
         self.empty
     }
-
 }
 
 #[test]
 fn bytes_to_item() {
-    let bytes = [0x81, 0x01, 0x01, 0x32, 0x39, 0x33, 0x35, 0x30, 0x30, 0x30, 0x30, 0x30, 0x33, 0x36, 0x34, 0x39, 0x00, 0x00, 0x00, 0x87, 0x93, 0x52, 0x55, 0x32, 0x39, 0x33, 0x00, 0x00, 0x00,];
+    let bytes = [
+        0x81, 0x01, 0x01, 0x32, 0x39, 0x33, 0x35, 0x30, 0x30, 0x30, 0x30, 0x30, 0x33, 0x36, 0x34,
+        0x39, 0x00, 0x00, 0x00, 0x87, 0x93, 0x52, 0x55, 0x32, 0x39, 0x33, 0x00, 0x00, 0x00,
+    ];
     let item = DanishRfidItem::from_bytes(&bytes).unwrap();
     println!("{:?}", item);
 }
@@ -281,7 +282,7 @@ fn item_to_bytes() {
         ordinal_number: 1,
         item_id: "2935000003649".to_string(),
         country: "RU".to_string(),
-        library_id: "293".to_string()
+        library_id: "293".to_string(),
     };
     for b in item.to_bytes() {
         print!("{:#X} ", b);
@@ -292,7 +293,11 @@ fn item_to_bytes() {
 #[test]
 fn crc() {
     // should be 0x87 0x93
-    let bytes_without_crc = [0x81, 0x01, 0x01, 0x32, 0x39, 0x33, 0x35, 0x30, 0x30, 0x30, 0x30, 0x30, 0x33, 0x36, 0x34, 0x39, 0x00, 0x00, 0x00, 0x52, 0x55, 0x32, 0x39, 0x33, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+    let bytes_without_crc = [
+        0x81, 0x01, 0x01, 0x32, 0x39, 0x33, 0x35, 0x30, 0x30, 0x30, 0x30, 0x30, 0x33, 0x36, 0x34,
+        0x39, 0x00, 0x00, 0x00, 0x52, 0x55, 0x32, 0x39, 0x33, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00,
+    ];
     // should be 0x1A 0xEE
     //let string = "RFID tag data model".as_bytes();
     println!("{:#X}", DanishRfidItem::calc_crc(&bytes_without_crc));

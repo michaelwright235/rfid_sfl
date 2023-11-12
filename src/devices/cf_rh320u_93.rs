@@ -1,16 +1,18 @@
-use cf_rh320u_93_reader::*;
-use crate::rfid_items::DanishRfidItem;
-use crate::devices::WriteResponse;
-use crate::routes::write_tags::WriteError;
 use super::Device;
+use crate::devices::WriteResponse;
+use crate::rfid_items::DanishRfidItem;
+use crate::routes::write_tags::WriteError;
+use cf_rh320u_93_reader::*;
 
 pub struct CfRh320u93 {
-    handle: Result<CFRH320U93, ReaderError>
+    handle: Result<CFRH320U93, ReaderError>,
 }
 
 impl CfRh320u93 {
     pub fn new() -> Self {
-        Self {handle: CFRH320U93::open()}
+        Self {
+            handle: CFRH320U93::open(),
+        }
     }
 }
 
@@ -49,7 +51,9 @@ impl Device for CfRh320u93 {
             if let Ok(inventory) = device.iso15693_inventory() {
                 // this reader supports reading only 1 card at a time
                 if inventory.len() == 1 {
-                    let bytes = device.iso15693_read(AccessFlag::WithoutUID, 0, 0x08).unwrap_or(vec![]);
+                    let bytes = device
+                        .iso15693_read(AccessFlag::WithoutUID, 0, 0x08)
+                        .unwrap_or(vec![]);
                     if let Ok(mut item) = DanishRfidItem::from_bytes(&bytes) {
                         item.set_card_id(inventory[0].to_vec());
                         return vec![item];
@@ -70,10 +74,10 @@ impl Device for CfRh320u93 {
                     resps.push(WriteResponse {
                         id: item.card_id_string(),
                         success: false,
-                        error: Some(WriteError{
+                        error: Some(WriteError {
                             r#type: "Write Error".to_string(),
-                            message: "Reader can write only one tag at a time".to_string()
-                        })
+                            message: "Reader can write only one tag at a time".to_string(),
+                        }),
                     });
                 }
                 return resps;
@@ -83,26 +87,27 @@ impl Device for CfRh320u93 {
                 return vec![WriteResponse {
                     id: items[0].card_id_string(),
                     success: true,
-                    error: None
+                    error: None,
                 }];
             } else {
                 return vec![WriteResponse {
                     id: items[0].card_id_string(),
                     success: false,
-                    error: Some(WriteError{
+                    error: Some(WriteError {
                         r#type: "Write Error".to_string(),
-                        message: "Error during writing a card. Probably there's no cards nearby.".to_string()
-                    })
+                        message: "Error during writing a card. Probably there's no cards nearby."
+                            .to_string(),
+                    }),
                 }];
             }
         }
         vec![WriteResponse {
             id: items[0].card_id_string(),
             success: false,
-            error: Some(WriteError{
+            error: Some(WriteError {
                 r#type: "Write Error".to_string(),
-                message: "Couldn't connect to the reader".to_string()
-            })
+                message: "Couldn't connect to the reader".to_string(),
+            }),
         }]
     }
 }

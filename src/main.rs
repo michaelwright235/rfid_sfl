@@ -1,15 +1,16 @@
 #![windows_subsystem = "windows"]
-#[macro_use(launch, routes, get, post, options, Responder, FromForm)] extern crate rocket;
+#[macro_use(launch, routes, get, post, options, Responder, FromForm)]
+extern crate rocket;
 mod config;
-mod routes;
 mod devices;
 mod rfid_items;
+mod routes;
 
-use std::{net::IpAddr, str::FromStr, fs::OpenOptions};
+use config::Config;
 use devices::DevicesList;
 use log::*;
 use simplelog::*;
-use config::Config;
+use std::{fs::OpenOptions, net::IpAddr, str::FromStr};
 
 const LOGFILE: &str = "rfid_sfl.log";
 
@@ -22,7 +23,8 @@ fn prepare_server() -> Option<Config> {
             simplelog::Config::default(),
             TerminalMode::Stdout,
             ColorChoice::Auto,
-        ).unwrap();
+        )
+        .unwrap();
         return None;
     }
 
@@ -38,7 +40,7 @@ fn prepare_server() -> Option<Config> {
                 core::mem::drop(log_file);
                 match std::fs::remove_file(LOGFILE) {
                     Ok(_) => (),
-                    Err(_) => println!("Unable to delete the old log file.")
+                    Err(_) => println!("Unable to delete the old log file."),
                 }
             } else {
                 core::mem::drop(log_file);
@@ -52,7 +54,8 @@ fn prepare_server() -> Option<Config> {
                 OpenOptions::new()
                     .append(true)
                     .create(true)
-                    .open(LOGFILE).unwrap()
+                    .open(LOGFILE)
+                    .unwrap(),
             ),
             TermLogger::new(
                 config.log_level(),
@@ -60,7 +63,8 @@ fn prepare_server() -> Option<Config> {
                 TerminalMode::Stdout,
                 ColorChoice::Auto,
             ),
-        ]).unwrap();
+        ])
+        .unwrap();
     } else {
         // Init Terminal logger only
         TermLogger::init(
@@ -68,7 +72,8 @@ fn prepare_server() -> Option<Config> {
             simplelog::Config::default(),
             TerminalMode::Stdout,
             ColorChoice::Auto,
-        ).unwrap();
+        )
+        .unwrap();
     }
     info!("Current config: {:?}", config);
     Some(config)
@@ -103,18 +108,19 @@ fn launch() -> _ {
     let devices_list = DevicesList::new();
     rocket::build()
         .configure(rocket_config)
-        .mount("/", routes![
-            crate::routes::index::handler,
-        ])
-        .mount("/rfid", routes![
-            crate::routes::rfid_index::handler,
-            crate::routes::get_devices_list::handler,
-            crate::routes::get_devices_list::handler_options,
-            crate::routes::get_items_list::handler,
-            crate::routes::get_items_list::handler_options,
-            crate::routes::write_tags::handler,
-            crate::routes::write_tags::handler_options,
-        ])
+        .mount("/", routes![crate::routes::index::handler,])
+        .mount(
+            "/rfid",
+            routes![
+                crate::routes::rfid_index::handler,
+                crate::routes::get_devices_list::handler,
+                crate::routes::get_devices_list::handler_options,
+                crate::routes::get_items_list::handler,
+                crate::routes::get_items_list::handler_options,
+                crate::routes::write_tags::handler,
+                crate::routes::write_tags::handler_options,
+            ],
+        )
         .manage(devices_list)
         .manage(config)
 }

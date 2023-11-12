@@ -1,5 +1,5 @@
-use rocket_client_addr::ClientAddr;
 use super::{check_if_addr_local, RfidResponse, RfidStatusResponse};
+use rocket_client_addr::ClientAddr;
 
 // GET http://127.0.0.1:21646/rfid/
 #[get("/")]

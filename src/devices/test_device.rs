@@ -1,5 +1,5 @@
 #[cfg(test)]
-use crate::{devices::{Device}, rfid_items::DanishRfidItem, routes::write_tags::WriteResponse};
+use crate::{devices::Device, rfid_items::DanishRfidItem, routes::write_tags::WriteResponse};
 
 #[cfg(test)]
 pub struct TestDevice;

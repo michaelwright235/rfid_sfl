@@ -1,9 +1,9 @@
+use super::{check_if_addr_local, RfidResponse, RfidStatusResponse};
+use crate::devices::DevicesList;
 use log::*;
-use rocket::serde::{Serialize, Deserialize, json};
+use rocket::serde::{json, Deserialize, Serialize};
 use rocket::State;
 use rocket_client_addr::ClientAddr;
-use crate::devices::DevicesList;
-use super::{check_if_addr_local, RfidResponse, RfidStatusResponse};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(crate = "rocket::serde")]
@@ -31,7 +31,8 @@ pub struct Tag {
 #[get("/?action=getItemsList&<deviceId>")]
 pub fn handler(
     shared_resource: &State<DevicesList>,
-    client_addr: &ClientAddr, deviceId: &str
+    client_addr: &ClientAddr,
+    deviceId: &str,
 ) -> RfidStatusResponse {
     // Check if remote address is local. If not then exit
     if let Err(r) = check_if_addr_local(client_addr) {
@@ -41,7 +42,7 @@ pub fn handler(
     let get_device = shared_resource.inner().get().get(&deviceId.to_string());
     if get_device.is_none() {
         debug!("Wrong device");
-        return RfidStatusResponse::Err404( RfidResponse::default() );
+        return RfidStatusResponse::Err404(RfidResponse::default());
     }
 
     let device_mutex = get_device.unwrap();
@@ -55,9 +56,7 @@ pub fn handler(
     let items = device.get_items();
     if items.is_empty() {
         info!("No cards found");
-        return RfidStatusResponse::Ok(
-            RfidResponse::from_str("[]")
-        );
+        return RfidStatusResponse::Ok(RfidResponse::from_str("[]"));
     }
 
     let mut item_responses = Vec::with_capacity(items.len());
@@ -73,14 +72,15 @@ pub fn handler(
                     r#type: 0,
                     itemSize: 0,
                     indexInItemPack: 0,
-                    libraryId: "".to_string() }]
+                    libraryId: "".to_string(),
+                }],
             });
             continue;
         }
         let mut library_id = item.country().to_owned();
         library_id.push('-');
         library_id.push_str(item.library_id());
-        
+
         let tag = Tag {
             tagId: item.card_id_string(),
             itemId: Some(item.item_id().to_owned()),
@@ -88,22 +88,19 @@ pub fn handler(
             r#type: item.usage_type(),
             itemSize: item.number_of_parts(),
             indexInItemPack: item.ordinal_number(),
-            libraryId: library_id
+            libraryId: library_id,
         };
         item_responses.push(ItemResponse {
             id: tag.itemId.to_owned(),
             r#type: tag.r#type.to_owned(),
-            tags: vec![tag]
+            tags: vec![tag],
         });
     }
-    
-    
+
     let response = json::to_string(&item_responses).unwrap();
     debug!("{response}");
 
-    RfidStatusResponse::Ok(
-        RfidResponse::from_string(response)
-    )
+    RfidStatusResponse::Ok(RfidResponse::from_string(response))
 }
 
 // OPTIONS http://127.0.0.1:21646/rfid/?action=getItemsList&deviceId=<deviceId>
@@ -111,7 +108,8 @@ pub fn handler(
 #[allow(non_snake_case)]
 pub fn handler_options(
     shared_resource: &State<DevicesList>,
-    client_addr: &ClientAddr, deviceId: &str
+    client_addr: &ClientAddr,
+    deviceId: &str,
 ) -> RfidStatusResponse {
     handler(shared_resource, client_addr, deviceId)
 }

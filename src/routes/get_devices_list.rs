@@ -1,9 +1,9 @@
+use super::{check_if_addr_local, RfidResponse, RfidStatusResponse};
+use crate::devices::DevicesList;
 use log::*;
-use rocket::serde::{Serialize, Deserialize, json};
+use rocket::serde::{json, Deserialize, Serialize};
 use rocket::State;
 use rocket_client_addr::ClientAddr;
-use crate::devices::DevicesList;
-use super::{check_if_addr_local, RfidResponse, RfidStatusResponse};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(crate = "rocket::serde")]
@@ -21,7 +21,10 @@ pub struct DeviceJson {
 
 // GET http://127.0.0.1:21646/rfid/?action=getDevicesList
 #[get("/?action=getDevicesList")]
-pub fn handler(shared_resource: &State<DevicesList>, client_addr: &ClientAddr) -> RfidStatusResponse {
+pub fn handler(
+    shared_resource: &State<DevicesList>,
+    client_addr: &ClientAddr,
+) -> RfidStatusResponse {
     // Check if remote address is local. If not then exit
     if let Err(r) = check_if_addr_local(client_addr) {
         return r;
@@ -49,13 +52,14 @@ pub fn handler(shared_resource: &State<DevicesList>, client_addr: &ClientAddr) -
 
     let response = json::to_string(&devices_json).unwrap_or("[]".to_string());
     debug!("{:?}", response);
-    RfidStatusResponse::Ok (
-        RfidResponse::from_string(response)
-    )
+    RfidStatusResponse::Ok(RfidResponse::from_string(response))
 }
 
 // OPTIONS http://127.0.0.1:21646/rfid/?action=getDevicesList
 #[options("/?action=getDevicesList")]
-pub fn handler_options(shared_resource: &State<DevicesList>, client_addr: &ClientAddr) -> RfidStatusResponse {
+pub fn handler_options(
+    shared_resource: &State<DevicesList>,
+    client_addr: &ClientAddr,
+) -> RfidStatusResponse {
     handler(shared_resource, client_addr)
 }

@@ -1,11 +1,11 @@
-pub mod index;
-pub mod rfid_index;
 pub mod get_devices_list;
 pub mod get_items_list;
+pub mod index;
+pub mod rfid_index;
 pub mod write_tags;
 
 use log::*;
-use rocket::http::{Header, ContentType};
+use rocket::http::{ContentType, Header};
 use rocket_client_addr::ClientAddr;
 
 // Wrapper for a response with a http status
@@ -18,7 +18,7 @@ pub enum RfidStatusResponse {
     #[response(status = 403)]
     Err403(RfidResponse),
     #[response(status = 404)]
-    Err404(RfidResponse)
+    Err404(RfidResponse),
 }
 
 // Response struct. Inner is the contnets of a response
@@ -27,7 +27,7 @@ pub enum RfidStatusResponse {
 pub struct RfidResponse {
     inner: String,
     header: Header<'static>,
-    content_type: ContentType
+    content_type: ContentType,
 }
 
 impl Default for RfidResponse {
@@ -35,17 +35,23 @@ impl Default for RfidResponse {
         Self {
             inner: "".to_string(),
             header: Header::new("Access-Control-Allow-Origin", "*"),
-            content_type: ContentType::new("application","json;charset=utf-8")
+            content_type: ContentType::new("application", "json;charset=utf-8"),
         }
     }
 }
 
 impl RfidResponse {
     pub fn from_string(s: String) -> Self {
-        Self { inner: s, ..Default::default() }
+        Self {
+            inner: s,
+            ..Default::default()
+        }
     }
     pub fn from_str(s: &str) -> Self {
-        Self { inner: s.to_string(), ..Default::default() }
+        Self {
+            inner: s.to_string(),
+            ..Default::default()
+        }
     }
 
     pub fn make_html(&mut self) {
@@ -61,8 +67,11 @@ fn check_if_addr_local(client_addr: &ClientAddr) -> Result<(), RfidStatusRespons
             return Ok(());
         }
     }
-    warn!("Remote address {} isn't local. Interrupting...",
-        client_addr.get_ipv4_string().unwrap_or("{unknown}".to_string())
+    warn!(
+        "Remote address {} isn't local. Interrupting...",
+        client_addr
+            .get_ipv4_string()
+            .unwrap_or("{unknown}".to_string())
     );
-    Err( RfidStatusResponse::Err403( RfidResponse::default() ) )
+    Err(RfidStatusResponse::Err403(RfidResponse::default()))
 }

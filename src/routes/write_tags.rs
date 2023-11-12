@@ -1,9 +1,9 @@
+use crate::{config::Config, devices::DevicesList, rfid_items::DanishRfidItem};
 use log::*;
-use rocket::State;
 use rocket::form::Form;
+use rocket::serde::{json, Deserialize, Serialize};
+use rocket::State;
 use rocket_client_addr::ClientAddr;
-use crate::{devices::DevicesList, rfid_items::DanishRfidItem, config::Config};
-use rocket::serde::{Serialize, Deserialize, json};
 
 use super::{check_if_addr_local, RfidResponse, RfidStatusResponse};
 
@@ -29,7 +29,7 @@ pub struct WriteRequest<'r> {
 pub struct WriteResponse {
     pub id: String,
     pub success: bool,
-    pub error: Option<WriteError>
+    pub error: Option<WriteError>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -40,24 +40,28 @@ pub struct WriteError {
 }
 
 // POST http://127.0.0.1:21646/rfid/
-#[post("/", data="<params>")]
+#[post("/", data = "<params>")]
 pub fn handler(
-    shared_resource: &State<DevicesList>, 
+    shared_resource: &State<DevicesList>,
     config: &State<Config>,
-    client_addr: &ClientAddr, 
-    params: Form<WriteRequest<'_>>) -> RfidStatusResponse {
+    client_addr: &ClientAddr,
+    params: Form<WriteRequest<'_>>,
+) -> RfidStatusResponse {
     // Check if remote address is local. If it's not then exit
     if let Err(r) = check_if_addr_local(client_addr) {
         return r;
     }
 
     if params.action != "writeTags" {
-        return RfidStatusResponse::Err404( RfidResponse::default() );
+        return RfidStatusResponse::Err404(RfidResponse::default());
     }
 
-    let get_device = shared_resource.inner().get().get(&params.deviceId.to_string());
+    let get_device = shared_resource
+        .inner()
+        .get()
+        .get(&params.deviceId.to_string());
     if get_device.is_none() {
-        return RfidStatusResponse::Err404( RfidResponse::default() );
+        return RfidStatusResponse::Err404(RfidResponse::default());
     }
 
     let device_mutex = get_device.unwrap();
@@ -67,20 +71,20 @@ pub fn handler(
     debug!("Write tag: {:?}", params);
 
     // Check if params are valid
-    if params.itemId.len() != params.id.len() ||
-       params.itemId.len() != params.r#type.len() ||
-       params.itemId.len() != params.libraryId.len() ||
-       params.itemId.len() != params.itemSize.len() ||
-       params.itemId.len() != params.indexInItemPack.len()
+    if params.itemId.len() != params.id.len()
+        || params.itemId.len() != params.r#type.len()
+        || params.itemId.len() != params.libraryId.len()
+        || params.itemId.len() != params.itemSize.len()
+        || params.itemId.len() != params.indexInItemPack.len()
     {
         debug!("Params are not valid!");
-        return RfidStatusResponse::Err400( RfidResponse::default() );
+        return RfidStatusResponse::Err400(RfidResponse::default());
     }
 
     for lib in &params.libraryId {
         if lib.len() < 3 {
             debug!("Library id is not valid!");
-            return RfidStatusResponse::Err400( RfidResponse::default() );
+            return RfidStatusResponse::Err400(RfidResponse::default());
         }
     }
 
@@ -90,14 +94,13 @@ pub fn handler(
         let mut item = DanishRfidItem::default();
         item.set_number_of_parts(params.itemSize[i]);
         item.set_ordinal_number(params.indexInItemPack[i]);
-        if 
-           item.set_item_id(params.itemId[i]).is_err() ||
-           item.set_usage_type(params.r#type[i]).is_err() ||
-           item.set_country(&params.libraryId[i][0..2]).is_err() ||
-           item.set_library_id(&params.libraryId[i][3..]).is_err()
+        if item.set_item_id(params.itemId[i]).is_err()
+            || item.set_usage_type(params.r#type[i]).is_err()
+            || item.set_country(&params.libraryId[i][0..2]).is_err()
+            || item.set_library_id(&params.libraryId[i][3..]).is_err()
         {
             debug!("Params of an item are not valid!");
-            return RfidStatusResponse::Err400( RfidResponse::default() );
+            return RfidStatusResponse::Err400(RfidResponse::default());
         }
         debug!("item = {:?}", item);
         items.push(item);
@@ -109,24 +112,25 @@ pub fn handler(
     if config.ask_when_writing() {
         confirm = rocket::tokio::task::block_in_place(|| {
             native_dialog::MessageDialog::new()
-            .set_title("RFID Server For Libraries")
-            .set_text("Записать карту на считывателе?")
-            .set_type(native_dialog::MessageType::Info).show_confirm().unwrap_or(true)
+                .set_title("RFID Server For Libraries")
+                .set_text("Записать карту на считывателе?")
+                .set_type(native_dialog::MessageType::Info)
+                .show_confirm()
+                .unwrap_or(true)
         });
         info!("User confirmation for writing a card: {confirm}");
     }
 
     if confirm {
         let responses = device.write_tags(items);
-        debug!("Write tag responses: {:?}",responses);
+        debug!("Write tag responses: {:?}", responses);
         info!("Card(s) has been successfully written");
-        RfidStatusResponse::Ok(
-            RfidResponse::from_string(json::to_string(&responses).unwrap())
-        )
+        RfidStatusResponse::Ok(RfidResponse::from_string(
+            json::to_string(&responses).unwrap(),
+        ))
     } else {
-        RfidStatusResponse::Err404( RfidResponse::default() )
+        RfidStatusResponse::Err404(RfidResponse::default())
     }
-
 }
 
 // OPTIONS http://127.0.0.1:21646/rfid/
@@ -136,5 +140,5 @@ pub fn handler_options(client_addr: &ClientAddr) -> RfidStatusResponse {
     if let Err(r) = check_if_addr_local(client_addr) {
         return r;
     }
-    RfidStatusResponse::Ok( RfidResponse::default() )
+    RfidStatusResponse::Ok(RfidResponse::default())
 }

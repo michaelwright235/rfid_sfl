@@ -1,8 +1,8 @@
 use log::*;
-use rocket::serde::{Serialize, Deserialize, json};
+use rocket::serde::{json, Deserialize, Serialize};
 use std::io::Write;
-use std::{fs::File, io::Read, net::Ipv4Addr, net::Ipv6Addr, str::FromStr};
 use std::path::Path;
+use std::{fs::File, io::Read, net::Ipv4Addr, net::Ipv6Addr, str::FromStr};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(crate = "rocket::serde")]
@@ -12,7 +12,7 @@ pub struct Config {
     log_level: String,
     log_to_file: bool,
     max_log_size: u16,
-    ask_when_writing: bool
+    ask_when_writing: bool,
 }
 
 impl Default for Config {
@@ -41,12 +41,10 @@ impl Config {
                     let write_result = f.write_all(Config::default_string().unwrap().as_bytes());
                     if write_result.is_ok() {
                         println!("Config file is created successfully");
-                    }
-                    else {
+                    } else {
                         println!("Unable to write to config file");
                     }
-                    
-                },
+                }
                 Err(_) => {
                     error!("Unable to create config file");
                     return Err(());
@@ -61,19 +59,23 @@ impl Config {
             Ok(mut f) => {
                 let result = f.read_to_string(&mut contents);
                 if result.is_err() {
-                    println!("Error reading config file: {:?}", result.err().unwrap().to_string());
+                    println!(
+                        "Error reading config file: {:?}",
+                        result.err().unwrap().to_string()
+                    );
                     return Err(());
                 }
-            },
+            }
             Err(_e) => {
                 //todo!("Другие варианты ошибок");
                 println!("Error opening config file: {:?}", _e.to_string());
                 return Err(());
             }
-        };        
-        
+        };
+
         // Парсинг JSON
-        let config_json: Result<Config, json::serde_json::Error> = json::from_str(contents.as_str());
+        let config_json: Result<Config, json::serde_json::Error> =
+            json::from_str(contents.as_str());
 
         if config_json.is_err() {
             println!("JSON error: {:?}", config_json.unwrap_err().to_string());
@@ -82,7 +84,9 @@ impl Config {
 
         let mut config = config_json.unwrap();
 
-        if Ipv4Addr::from_str(&config.address).is_err() && Ipv6Addr::from_str(&config.address).is_err() {
+        if Ipv4Addr::from_str(&config.address).is_err()
+            && Ipv6Addr::from_str(&config.address).is_err()
+        {
             println!("Incorrect IP address in config.json");
             return Err(());
         }
@@ -92,7 +96,7 @@ impl Config {
             _ => {
                 config.log_level = "Info".to_string();
                 println!("Field 'log_level' in config.json is incorrect. Options are: Off, Error, Warn, Info, Debug, Trace. Using 'Info'...");
-            },
+            }
         }
 
         Ok(config)
@@ -100,10 +104,12 @@ impl Config {
 
     #[allow(unused)]
     pub fn default_string() -> Result<String, ()> {
-        let config = json::to_pretty_string(&Config{..Default::default()});
+        let config = json::to_pretty_string(&Config {
+            ..Default::default()
+        });
         match config {
             Err(_) => Err(()),
-            Ok(r) => Ok(r)
+            Ok(r) => Ok(r),
         }
     }
 
@@ -143,6 +149,4 @@ impl Config {
     pub fn ask_when_writing(&self) -> bool {
         self.ask_when_writing
     }
-
-
 }
