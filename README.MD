@@ -9,10 +9,10 @@
 
 RFID SFL создает локальный сервер (по-умолчанию – 127.0.0.1:21646). Сервер отправляет заголовок `Access-Control-Allow-Origin=*`, поэтому к нему могут обращаться сайты прямо из браузера.
 
- - `/` и `/rfid` (GET)– HTML-страница для проверки работоспособности.
- - `/rfid/?action=getDevicesList` (GET)– JSON-ответ со списком доступных считывателей.
- - `/rfid/?action=getItemsList&deviceId=<deviceId>` (GET) – JSON-ответ с данными карт, которые находятся в зоне доступа указанного считывателя. Карта должна содержать данные, соответствующие стандарту [RFID Data Model for Libraries (Danish Standard)](https://biblev.no/RFID/dansk_rfid_datamodel.pdf).
- - `/rfid` (POST, `action=writeTags&<params..>`) – записывает на карту данные.
+- `/` и `/rfid` (GET)– HTML-страница для проверки работоспособности.
+- `/rfid/?action=getDevicesList` (GET)– JSON-ответ со списком доступных считывателей.
+- `/rfid/?action=getItemsList&deviceId=<deviceId>` (GET) – JSON-ответ с данными карт, которые находятся в зоне доступа указанного считывателя. Карта должна содержать данные, соответствующие стандарту [RFID Data Model for Libraries (Danish Standard)](https://biblev.no/RFID/dansk_rfid_datamodel.pdf).
+- `/rfid` (POST, `action=writeTags&<params..>`) – записывает на карту данные.
 
 ## Конфигурация
 
@@ -35,7 +35,7 @@ RFID SFL создает локальный сервер (по-умолчанию
 
 Установите среду Rust, согласно [официальной инструкции](https://www.rust-lang.org/tools/install). Затем скачайте исходный код и в папке выполните следующую команду:
 
-```
+```bash
 cargo build --release
 ```
 
