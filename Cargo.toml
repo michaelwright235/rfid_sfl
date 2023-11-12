@@ -16,6 +16,7 @@ rocket-client-addr = "0.5.4"
 log = "0.4.20"
 simplelog = "0.12.1"
 native-dialog = "0.7.0"
+bibliotheca_rfid_reader = {git = "https://github.com/michaelwright235/bibliotheca_rfid_reader"}
 
 [profile.release]
 strip = true

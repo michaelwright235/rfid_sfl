@@ -1,8 +1,9 @@
+mod bibliotheca;
 mod cf_rh320u_93;
 #[cfg(test)]
 mod test_device;
 
-use self::cf_rh320u_93::CfRh320u93;
+use self::{bibliotheca::Bibliotheca, cf_rh320u_93::CfRh320u93};
 use crate::{rfid_items::DanishRfidItem, routes::write_tags::WriteResponse};
 use std::{collections::HashMap, sync::Mutex};
 
@@ -15,8 +16,9 @@ pub trait Device: Send + Sync {
     fn compound_data_is_supported(&self) -> bool;
     fn is_read_only(&self) -> bool;
     fn get_items(&mut self) -> Vec<DanishRfidItem>; // List<RfidItem>
-    //fn set_tags_security(&self, params: HashMap<String, bool>) -> Result<(),()>;
     fn write_tags(&mut self, items: Vec<DanishRfidItem>) -> Vec<WriteResponse>;
+
+    //fn set_tags_security(&self, params: HashMap<String, bool>) -> Result<(),()>;
 }
 
 pub struct DevicesList {
@@ -35,6 +37,10 @@ impl DevicesList {
         devices.insert(
             "Chafon CF-RH320U-93".to_string(),
             Mutex::new(Box::new(CfRh320u93::new())),
+        );
+        devices.insert(
+            "Bibliotheca 210 Reader".to_string(),
+            Mutex::new(Box::new(Bibliotheca::new())),
         );
 
         Self { devices }
