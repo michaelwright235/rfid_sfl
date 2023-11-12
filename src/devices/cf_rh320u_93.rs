@@ -44,7 +44,7 @@ impl Device for CfRh320u93 {
         false
     }
 
-    fn get_items(&self) -> Vec<DanishRfidItem> {
+    fn get_items(&mut self) -> Vec<DanishRfidItem> {
         if let Ok(device) = &self.handle {
             let _ = device.control_led(0x01, 0x20);
 
@@ -64,7 +64,7 @@ impl Device for CfRh320u93 {
         vec![]
     }
 
-    fn write_tags(&self, items: Vec<DanishRfidItem>) -> Vec<WriteResponse> {
+    fn write_tags(&mut self, items: Vec<DanishRfidItem>) -> Vec<WriteResponse> {
         if let Ok(device) = &self.handle {
             let _ = device.control_led(0x01, 0x10);
 

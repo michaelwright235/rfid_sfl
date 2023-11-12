@@ -1,10 +1,6 @@
-#[cfg(test)]
 use crate::{devices::Device, rfid_items::DanishRfidItem, routes::write_tags::WriteResponse};
-
-#[cfg(test)]
 pub struct TestDevice;
 
-#[cfg(test)]
 impl Device for TestDevice {
     fn connect(&mut self) {}
 
@@ -24,7 +20,7 @@ impl Device for TestDevice {
         true
     }
 
-    fn get_items(&self) -> Vec<DanishRfidItem> {
+    fn get_items(&mut self) -> Vec<DanishRfidItem> {
         let mut item = DanishRfidItem::default();
         if item.set_item_id("1234567890").is_err() {
             return vec![];
@@ -39,7 +35,7 @@ impl Device for TestDevice {
         vec![item]
     }
 
-    fn write_tags(&self, _: Vec<DanishRfidItem>) -> Vec<WriteResponse> {
+    fn write_tags(&mut self, _: Vec<DanishRfidItem>) -> Vec<WriteResponse> {
         vec![]
     }
 }
