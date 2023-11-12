@@ -10,12 +10,12 @@ version = "1.0.1"
 edition = "2021"
 
 [dependencies]
-rocket = {version = "0.5.0-rc.2", features = ["http2", "json"]}
+rocket = {version = "0.5.0-rc.4", features = ["http2", "json"]}
 cf_rh320u_93_reader = "0.3.1"
-rocket-client-addr = "0.5.2"
-log = "0.4.17"
-simplelog = "0.12.0"
-native-dialog = {git = "https://github.com/michaelwright235/native-dialog-rs", branch = "user_notification"}
+rocket-client-addr = "0.5.4"
+log = "0.4.20"
+simplelog = "0.12.1"
+native-dialog = "0.7.0"
 
 [profile.release]
 strip = true
